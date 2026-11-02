@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Maya Matematika Kelas 1 SD - Membandingkan Ukuran & Berat</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Fredoka for kid-friendly aesthetics -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Fredoka', cursive, sans-serif;
+            background-color: #f0fdf4;
+        }
+
+        /* Custom animation effects */
+        .bounce-slow {
+            animation: bounce 2s infinite;
+        }
+
+        .wiggle:hover {
+            animation: wiggle 0.5s ease-in-out;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        /* Seesaw balance rotation transition */
+        .seesaw-plank {
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-origin: center center;
+        }
+
+        /* Custom glassmorphism cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border: 4px solid #fde047;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between">
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400 p-4 shadow-lg text-white">
+        <div class="max-w-5xl mx-auto flex flex-wrap justify-between items-center gap-2">
+            <div class="flex items-center gap-3">
+                <div class="bg-white text-amber-500 rounded-full w-12 h-12 flex items-center justify-center text-2xl font-bold shadow">
+                    <i class="fa-solid fa-shapes"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide drop-shadow">Lab Maya Matematika</h1>
+                    <p class="text-xs md:text-sm font-semibold text-amber-100">Materi Kelas 1 SD: Panjang & Berat</p>
+                </div>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <nav class="flex flex-wrap gap-2 bg-white/20 p-1.5 rounded-2xl backdrop-blur-md items-center">
+                <button id="btn-panjang" onclick="switchTab('panjang')" class="px-4 py-2 rounded-xl font-bold transition flex items-center gap-2 bg-white text-orange-600 shadow">
+                    <i class="fa-solid fa-ruler-horizontal"></i> Ukur Panjang
+                </button>
+                <button id="btn-berat" onclick="switchTab('berat')" class="px-4 py-2 rounded-xl font-bold transition flex items-center gap-2 text-white hover:bg-white/30">
+                    <i class="fa-solid fa-scale-balanced"></i> Ukur Berat
+                </button>
+                <button id="btn-kuis" onclick="switchTab('kuis')" class="px-4 py-2 rounded-xl font-bold transition flex items-center gap-2 text-white hover:bg-white/30">
+                    <i class="fa-solid fa-star"></i> Kuis Seru
+                </button>
+                <!-- Sound Toggle Button -->
+                <button id="btn-sound" onclick="toggleSound()" class="px-3 py-2 bg-white/30 hover:bg-white/40 text-white rounded-xl font-bold transition flex items-center gap-1.5 ml-1" title="Matikan/Aktifkan Suara">
+                    <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-5xl w-full mx-auto p-4 flex-grow">
+
+        <!-- IDENTITAS SISWA (NAMA & KELAS) -->
+        <div class="bg-white border-4 border-amber-300 rounded-3xl p-4 shadow-md mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-2 text-amber-800 font-bold text-lg">
+                <i class="fa-solid fa-id-card text-2xl text-amber-500"></i>
+                <span>Identitas Siswa:</span>
+            </div>
+            <div class="flex flex-wrap gap-4 w-full sm:w-auto">
+                <div class="flex items-center gap-2 flex-1 sm:flex-none">
+                    <label for="student-name" class="font-bold text-slate-700 text-sm">Nama:</label>
+                    <input type="text" id="student-name" placeholder="Masukkan nama..." class="bg-amber-50 border-2 border-amber-300 rounded-xl px-3 py-1.5 text-sm font-semibold text-slate-800 focus:outline-none focus:border-amber-500 w-full sm:w-48">
+                </div>
+                <div class="flex items-center gap-2 flex-1 sm:flex-none">
+                    <label for="student-class" class="font-bold text-slate-700 text-sm">Kelas:</label>
+                    <input type="text" id="student-class" value="1 SD" placeholder="Kelas..." class="bg-amber-50 border-2 border-amber-300 rounded-xl px-3 py-1.5 text-sm font-semibold text-slate-800 focus:outline-none focus:border-amber-500 w-24">
+                </div>
+            </div>
+        </div>
+
+        <!-- ALERT MESSAGE BOX -->
+        <div id="alert-box" class="hidden mb-4 p-4 rounded-2xl text-center font-bold text-lg shadow-md transition-all"></div>
+
+        <!-- ================= MODUL 1: MEMBANDINGKAN PANJANG ================= -->
+        <section id="modul-panjang" class="space-y-6">
+            <!-- Instructions Card -->
+            <div class="bg-sky-100 border-4 border-sky-300 rounded-3xl p-5 shadow-md flex items-center gap-4">
+                <div class="text-4xl text-sky-500 hidden sm:block">
+                    <i class="fa-solid fa-lightbulb"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-sky-800">Laboratorium Panjang Benda 📏</h2>
+                    <p class="text-sky-900">Geser slider di bawah setiap benda untuk mengubah ukurannya, lalu perhatikan benda mana yang <b>lebih panjang</b> atau <b>lebih pendek</b>!</p>
+                </div>
+            </div>
+
+            <!-- Interactive Visual Lab -->
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Benda A -->
+                <div class="bg-white border-4 border-emerald-400 rounded-3xl p-6 shadow-xl flex flex-col items-center">
+                    <span class="bg-emerald-100 text-emerald-700 px-4 py-1 rounded-full text-sm font-bold mb-4">Benda A</span>
+                    <div class="h-44 w-full flex items-center justify-start bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-4 relative overflow-hidden">
+                        <!-- Ruler background marks -->
+                        <div class="absolute bottom-1 left-0 right-0 h-4 flex justify-between px-2 opacity-30 text-xs font-mono">
+                            <span>| 0</span><span>| 5</span><span>| 10</span><span>| 15</span><span>| 20</span>
+                        </div>
+                        <!-- Object A (Pensil) -->
+                        <div id="obj-a" class="h-14 bg-emerald-500 rounded-r-2xl flex items-center justify-end px-3 text-white font-bold transition-all duration-300 shadow-md relative" style="width: 50%;">
+                            <span id="label-len-a" class="mr-2">10 cm</span>
+                            <div class="absolute -right-3 top-0 bottom-0 w-0 h-0 border-t-[28px] border-t-transparent border-b-[28px] border-b-transparent border-l-[12px] border-l-amber-600"></div>
+                        </div>
+                    </div>
+                    <!-- Control Slider -->
+                    <div class="w-full mt-6 space-y-2">
+                        <label for="slider-a" class="font-bold text-slate-700 flex justify-between">
+                            <span>Atur Panjang Pensil Hijau:</span>
+                        </label>
+                        <input type="range" id="slider-a" min="2" max="20" value="10" class="w-full accent-emerald-500 h-3 rounded-lg cursor-pointer" oninput="updatePanjang(true)">
+                    </div>
+                </div>
+
+                <!-- Benda B -->
+                <div class="bg-white border-4 border-purple-400 rounded-3xl p-6 shadow-xl flex flex-col items-center">
+                    <span class="bg-purple-100 text-purple-700 px-4 py-1 rounded-full text-sm font-bold mb-4">Benda B</span>
+                    <div class="h-44 w-full flex items-center justify-start bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-4 relative overflow-hidden">
+                        <!-- Ruler background marks -->
+                        <div class="absolute bottom-1 left-0 right-0 h-4 flex justify-between px-2 opacity-30 text-xs font-mono">
+                            <span>| 0</span><span>| 5</span><span>| 10</span><span>| 15</span><span>| 20</span>
+                        </div>
+                        <!-- Object B (Penggaris/Permen) -->
+                        <div id="obj-b" class="h-14 bg-purple-500 rounded-r-2xl flex items-center justify-end px-3 text-white font-bold transition-all duration-300 shadow-md relative" style="width: 70%;">
+                            <span id="label-len-b" class="mr-2">14 cm</span>
+                            <div class="absolute -right-3 top-0 bottom-0 w-0 h-0 border-t-[28px] border-t-transparent border-b-[28px] border-b-transparent border-l-[12px] border-l-purple-700"></div>
+                        </div>
+                    </div>
+                    <!-- Control Slider -->
+                    <div class="w-full mt-6 space-y-2">
+                        <label for="slider-b" class="font-bold text-slate-700 flex justify-between">
+                            <span>Atur Panjang Pensil Ungu:</span>
+                        </label>
+                        <input type="range" id="slider-b" min="2" max="20" value="14" class="w-full accent-purple-500 h-3 rounded-lg cursor-pointer" oninput="updatePanjang(true)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conclusion Box -->
+            <div class="bg-amber-100 border-4 border-amber-300 rounded-3xl p-6 text-center shadow-md">
+                <h3 class="text-lg font-bold text-amber-800 mb-2">Kesimpulan Perbandingan:</h3>
+                <p id="hasil-panjang-text" class="text-2xl font-black text-amber-900">
+                    Pensil Ungu <span class="text-purple-600">LEBIH PANJANG</span> dari Pensil Hijau.
+                </p>
+            </div>
+        </section>
+
+        <!-- ================= MODUL 2: MEMBANDINGKAN BERAT ================= -->
+        <section id="modul-berat" class="space-y-6 hidden">
+            <!-- Instructions Card -->
+            <div class="bg-rose-100 border-4 border-rose-300 rounded-3xl p-5 shadow-md flex items-center gap-4">
+                <div class="text-4xl text-rose-500 hidden sm:block">
+                    <i class="fa-solid fa-weight-hanging"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-rose-800">Laboratorium Timbangan Berat ⚖️</h2>
+                    <p class="text-rose-900">Pilih benda di sebelah kiri dan kanan timbangan untuk melihat benda mana yang <b>lebih berat</b> atau <b>lebih ringan</b>!</p>
+                </div>
+            </div>
+
+            <!-- Interactive Seesaw Lab -->
+            <div class="bg-white border-4 border-sky-300 rounded-3xl p-6 shadow-xl flex flex-col items-center relative overflow-hidden">
+                <!-- Selectors -->
+                <div class="w-full grid grid-cols-2 gap-4 mb-8 z-10">
+                    <!-- Left Selection -->
+                    <div class="flex flex-col items-center">
+                        <label class="font-bold text-slate-700 mb-2">Sisi Kiri (A):</label>
+                        <select id="select-left" onchange="updateBerat(true)" class="bg-emerald-50 border-2 border-emerald-400 font-bold text-emerald-800 rounded-xl px-4 py-2 text-lg focus:outline-none w-full max-w-xs shadow">
+                            <option value="gajah">🐘 Gajah (Sangat Berat)</option>
+                            <option value="semangka">🍉 Semangka (Berat)</option>
+                            <option value="apel" selected>🍎 Apel (Sedang)</option>
+                            <option value="bulu">🪶 Bulu (Sangat Ringan)</option>
+                        </select>
+                    </div>
+                    <!-- Right Selection -->
+                    <div class="flex flex-col items-center">
+                        <label class="font-bold text-slate-700 mb-2">Sisi Kanan (B):</label>
+                        <select id="select-right" onchange="updateBerat(true)" class="bg-purple-50 border-2 border-purple-400 font-bold text-purple-800 rounded-xl px-4 py-2 text-lg focus:outline-none w-full max-w-xs shadow">
+                            <option value="gajah">🐘 Gajah (Sangat Berat)</option>
+                            <option value="semangka" selected>🍉 Semangka (Berat)</option>
+                            <option value="apel">🍎 Apel (Sedang)</option>
+                            <option value="bulu">🪶 Bulu (Sangat Ringan)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Seesaw Graphic Area -->
+                <div class="w-full h-64 flex flex-col items-center justify-end relative my-4">
+                    <!-- Rotating Plank Structure -->
+                    <div id="seesaw-plank" class="seesaw-plank w-4/5 h-4 bg-amber-700 rounded-full flex justify-between items-center relative px-2 shadow-lg">
+                        
+                        <!-- Left Basket/Object -->
+                        <div class="absolute left-0 -top-24 -translate-x-1/2 flex flex-col items-center">
+                            <div id="icon-left" class="text-6xl drop-shadow-md wiggle transition-transform">🍎</div>
+                            <div class="w-20 h-8 border-b-4 border-x-4 border-amber-800 rounded-b-xl bg-amber-200/50"></div>
+                        </div>
+
+                        <!-- Center Pivot Point -->
+                        <div class="w-6 h-6 bg-amber-900 rounded-full mx-auto z-10 border-2 border-white"></div>
+
+                        <!-- Right Basket/Object -->
+                        <div class="absolute right-0 -top-24 translate-x-1/2 flex flex-col items-center">
+                            <div id="icon-right" class="text-6xl drop-shadow-md wiggle transition-transform">🍉</div>
+                            <div class="w-20 h-8 border-b-4 border-x-4 border-amber-800 rounded-b-xl bg-amber-200/50"></div>
+                        </div>
+                    </div>
+
+                    <!-- Seesaw Base (Triangle) -->
+                    <div class="w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[60px] border-b-amber-800 shadow-md"></div>
+                    <div class="w-64 h-4 bg-slate-300 rounded-full mt-[-2px]"></div>
+                </div>
+            </div>
+
+            <!-- Conclusion Box -->
+            <div class="bg-rose-100 border-4 border-rose-300 rounded-3xl p-6 text-center shadow-md">
+                <h3 class="text-lg font-bold text-rose-800 mb-2">Hasil Penimbangan:</h3>
+                <p id="hasil-berat-text" class="text-2xl font-black text-rose-900">
+                    Apel <span class="text-sky-600">LEBIH RINGAN</span> dari Semangka.
+                </p>
+            </div>
+        </section>
+
+        <!-- ================= MODUL 3: KUIS INTERAKTIF ================= -->
+        <section id="modul-kuis" class="space-y-6 hidden">
+            <!-- Instructions Card -->
+            <div class="bg-indigo-100 border-4 border-indigo-300 rounded-3xl p-5 shadow-md flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="text-4xl text-indigo-500">
+                        <i class="fa-solid fa-gamepad"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-indigo-800">Kuis Seru Matematika 🎮</h2>
+                        <p class="text-indigo-900">Jawab pertanyaan berikut dengan benar untuk mendapatkan bintang!</p>
+                    </div>
+                </div>
+                <div class="bg-white px-4 py-2 rounded-2xl border-2 border-indigo-300 font-bold text-indigo-700 text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-star text-amber-400"></i> Skors: <span id="score-text">0</span>
+                </div>
+            </div>
+
+            <!-- Quiz Card -->
+            <div class="bg-white border-4 border-indigo-200 rounded-3xl p-6 sm:p-8 shadow-xl">
+                <div id="quiz-container">
+                    <span id="quiz-category" class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Soal #1</span>
+                    <h3 id="quiz-question" class="text-2xl font-bold text-slate-800 my-4">Pertanyaan akan muncul di sini...</h3>
+                    
+                    <!-- Visual Illustration for Quiz -->
+                    <div id="quiz-illustration" class="my-6 p-6 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex justify-center items-center gap-8 min-h-[140px]">
+                        <!-- Dynamic content injected by JS -->
+                    </div>
+
+                    <!-- Options Grid -->
+                    <div id="quiz-options" class="grid sm:grid-cols-2 gap-4">
+                        <!-- Dynamic Option Buttons -->
+                    </div>
+                </div>
+
+                <!-- Quiz Completion View (Hidden by default) -->
+                <div id="quiz-complete" class="hidden text-center py-8 space-y-4">
+                    <div class="text-6xl text-amber-400 bounce-slow">🏆</div>
+                    <h3 id="congrats-title" class="text-3xl font-extrabold text-slate-800">Hore! Kamu Hebat Sekali!</h3>
+                    <p id="final-score-text" class="text-xl text-slate-600 font-semibold">Kamu berhasil menyelesaikan semua soal!</p>
+                    <button onclick="resetQuiz()" class="mt-4 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl text-lg shadow-lg transition transform hover:-translate-y-1">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> Main Lagi
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-800 text-slate-300 text-center p-4 text-sm mt-8 border-t-4 border-amber-400">
+        <p>© 2026 Lab Maya Matematika SD - Media Pembelajaran Interaktif Kelas 1 SD</p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Web Audio API Sound Effects Synthesizer
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    audioCtx = new AudioContext();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+                playPopSound();
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark';
+            }
+        }
+
+        // Sound 1: Soft Pop / Click for Sliders & Buttons
+        function playPopSound() {
+            if (!soundEnabled) return;
+            const ctx = getAudioContext();
+            if (!ctx) return;
+
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(400, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.05);
+
+            gain.gain.setValueAtTime(0.15, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start();
+            osc.stop(ctx.currentTime + 0.05);
+        }
+
+        // Sound 2: Correct Answer Chime
+        function playCorrectSound() {
+            if (!soundEnabled) return;
+            const ctx = getAudioContext();
+            if (!ctx) return;
+
+            const now = ctx.currentTime;
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            notes.forEach((freq, idx) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+
+                gain.gain.setValueAtTime(0, now + idx * 0.08);
+                gain.gain.linearRampToValueAtTime(0.2, now + idx * 0.08 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.25);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(now + idx * 0.08);
+                osc.stop(now + idx * 0.08 + 0.25);
+            });
+        }
+
+        // Sound 3: Incorrect Answer Tone
+        function playWrongSound() {
+            if (!soundEnabled) return;
+            const ctx = getAudioContext();
+            if (!ctx) return;
+
+            const now = ctx.currentTime;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(220, now);
+            osc.frequency.exponentialRampToValueAtTime(130, now + 0.25);
+
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(now);
+            osc.stop(now + 0.25);
+        }
+
+        // Sound 4: Celebration Fanfare for Quiz Completion
+        function playVictorySound() {
+            if (!soundEnabled) return;
+            const ctx = getAudioContext();
+            if (!ctx) return;
+
+            const now = ctx.currentTime;
+            const notes = [440, 554.37, 659.25, 880]; // A4, C#5, E5, A5
+            notes.forEach((freq, idx) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+
+                gain.gain.setValueAtTime(0.2, now + idx * 0.12);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.4);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(now + idx * 0.12);
+                osc.stop(now + idx * 0.12 + 0.4);
+            });
+        }
+
+        // Data Berat Benda (Nilai relatif)
+        const weightData = {
+            gajah: { name: 'Gajah', weight: 100, icon: '🐘' },
+            semangka: { name: 'Semangka', weight: 30, icon: '🍉' },
+            apel: { name: 'Apel', weight: 10, icon: '🍎' },
+            bulu: { name: 'Bulu', weight: 1, icon: '🪶' }
+        };
+
+        // Data Kuis
+        const quizData = [
+            {
+                category: 'Membandingkan Panjang',
+                question: 'Manakah pensil yang LEBIH PANJANG?',
+                illustration: `
+                    <div class="flex flex-col gap-4 w-full max-w-xs">
+                        <div class="bg-red-500 h-8 rounded-r-xl w-3/4 flex items-center justify-end px-2 text-white font-bold text-xs">Pensil A</div>
+                        <div class="bg-blue-500 h-8 rounded-r-xl w-full flex items-center justify-end px-2 text-white font-bold text-xs">Pensil B</div>
+                    </div>
+                `,
+                options: ['Pensil A', 'Pensil B', 'Sama Panjang'],
+                correct: 1
+            },
+            {
+                category: 'Membandingkan Berat',
+                question: 'Manakah benda yang LEBIH BERAT?',
+                illustration: `
+                    <div class="flex gap-12 text-5xl">
+                        <div class="flex flex-col items-center"><span class="text-sm font-bold text-slate-500 mb-1">A</span>🍉</div>
+                        <div class="flex flex-col items-center"><span class="text-sm font-bold text-slate-500 mb-1">B</span>🪶</div>
+                    </div>
+                `,
+                options: ['Semangka (A)', 'Bulu (B)', 'Sama Berat'],
+                correct: 0
+            },
+            {
+                category: 'Membandingkan Panjang',
+                question: 'Ular A (15 cm) dan Ular B (15 cm). Pernyataan yang benar adalah...',
+                illustration: `
+                    <div class="flex flex-col gap-3 w-full max-w-xs">
+                        <div class="bg-emerald-500 h-6 rounded-full w-4/5 text-center text-white text-xs font-bold leading-6">Ular A (15 cm)</div>
+                        <div class="bg-emerald-600 h-6 rounded-full w-4/5 text-center text-white text-xs font-bold leading-6">Ular B (15 cm)</div>
+                    </div>
+                `,
+                options: ['Ular A Lebih Panjang', 'Ular B Lebih Panjang', 'Sama Panjang'],
+                correct: 2
+            },
+            {
+                category: 'Membandingkan Berat',
+                question: 'Benda yang LEBIH RINGAN dari Gajah 🐘 adalah...',
+                illustration: `
+                    <div class="text-6xl">🐘</div>
+                `,
+                options: ['Gajah lain', 'Bulu 🪶', 'Dua Gajah'],
+                correct: 1
+            }
+        ];
+
+        let currentQuizIndex = 0;
+        let score = 0;
+
+        // Switch Tabs Logic
+        function switchTab(tabName) {
+            playPopSound();
+            const tabs = ['panjang', 'berat', 'kuis'];
+            tabs.forEach(t => {
+                document.getElementById(`modul-${t}`).classList.add('hidden');
+                const btn = document.getElementById(`btn-${t}`);
+                btn.classList.remove('bg-white', 'text-orange-600', 'shadow');
+                btn.classList.add('text-white', 'hover:bg-white/30');
+            });
+
+            document.getElementById(`modul-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`btn-${tabName}`);
+            activeBtn.classList.remove('text-white', 'hover:bg-white/30');
+            activeBtn.classList.add('bg-white', 'text-orange-600', 'shadow');
+
+            if(tabName === 'kuis' && currentQuizIndex === 0 && score === 0) {
+                loadQuizQuestion();
+            }
+        }
+
+        // Custom Alert Utility (Replacing window.alert)
+        function showAlert(message, isSuccess = true) {
+            const alertBox = document.getElementById('alert-box');
+            alertBox.textContent = message;
+            alertBox.className = `p-4 rounded-2xl text-center font-bold text-lg shadow-md transition-all ${
+                isSuccess ? 'bg-emerald-100 border-2 border-emerald-400 text-emerald-800' : 'bg-rose-100 border-2 border-rose-400 text-rose-800'
+            }`;
+            alertBox.classList.remove('hidden');
+            setTimeout(() => {
+                alertBox.classList.add('hidden');
+            }, 3000);
+        }
+
+        // ================= MODUL PANJANG LOGIC =================
+        function updatePanjang(userInteracted = false) {
+            if (userInteracted) playPopSound();
+
+            const valA = parseInt(document.getElementById('slider-a').value);
+            const valB = parseInt(document.getElementById('slider-b').value);
+
+            // Update visual widths
+            const widthA = (valA / 20) * 100;
+            const widthB = (valB / 20) * 100;
+
+            document.getElementById('obj-a').style.width = `${widthA}%`;
+            document.getElementById('obj-b').style.width = `${widthB}%`;
+
+            document.getElementById('label-len-a').textContent = `${valA} cm`;
+            document.getElementById('label-len-b').textContent = `${valB} cm`;
+
+            // Update comparison text
+            const textElement = document.getElementById('hasil-panjang-text');
+            if (valA > valB) {
+                textElement.innerHTML = `Pensil Hijau (${valA} cm) <span class="text-emerald-600">LEBIH PANJANG</span> dari Pensil Ungu (${valB} cm).`;
+            } else if (valB > valA) {
+                textElement.innerHTML = `Pensil Ungu (${valB} cm) <span class="text-purple-600">LEBIH PANJANG</span> dari Pensil Hijau (${valA} cm).`;
+            } else {
+                textElement.innerHTML = `Pensil Hijau dan Pensil Ungu <span class="text-amber-600">SAMA PANJANG</span> (${valA} cm).`;
+            }
+        }
+
+        // ================= MODUL BERAT LOGIC =================
+        function updateBerat(userInteracted = false) {
+            if (userInteracted) playPopSound();
+
+            const keyLeft = document.getElementById('select-left').value;
+            const keyRight = document.getElementById('select-right').value;
+
+            const itemLeft = weightData[keyLeft];
+            const itemRight = weightData[keyRight];
+
+            // Update icons
+            document.getElementById('icon-left').textContent = itemLeft.icon;
+            document.getElementById('icon-right').textContent = itemRight.icon;
+
+            const plank = document.getElementById('seesaw-plank');
+            const resultText = document.getElementById('hasil-berat-text');
+
+            if (itemLeft.weight > itemRight.weight) {
+                // Left heavier -> Plank rotates counter-clockwise (deg negative)
+                plank.style.transform = 'rotate(-12deg)';
+                resultText.innerHTML = `${itemLeft.name} ${itemLeft.icon} <span class="text-rose-600">LEBIH BERAT</span> daripada ${itemRight.name} ${itemRight.icon}.`;
+            } else if (itemRight.weight > itemLeft.weight) {
+                // Right heavier -> Plank rotates clockwise (deg positive)
+                plank.style.transform = 'rotate(12deg)';
+                resultText.innerHTML = `${itemLeft.name} ${itemLeft.icon} <span class="text-sky-600">LEBIH RINGAN</span> daripada ${itemRight.name} ${itemRight.icon}.`;
+            } else {
+                // Equal weight
+                plank.style.transform = 'rotate(0deg)';
+                resultText.innerHTML = `${itemLeft.name} ${itemLeft.icon} dan ${itemRight.name} ${itemRight.icon} <span class="text-amber-600">SAMA BERAT</span>.`;
+            }
+        }
+
+        // ================= KUIS LOGIC =================
+        function loadQuizQuestion() {
+            if (currentQuizIndex >= quizData.length) {
+                // Get student name and class
+                const nameInput = document.getElementById('student-name').value.trim();
+                const classInput = document.getElementById('student-class').value.trim();
+                const studentDisplayName = nameInput ? nameInput : "Teman Cilik";
+                const studentDisplayClass = classInput ? ` (Kelas ${classInput})` : "";
+
+                // Show completion screen
+                document.getElementById('quiz-container').classList.add('hidden');
+                document.getElementById('quiz-complete').classList.remove('hidden');
+                document.getElementById('congrats-title').textContent = `Hore, ${studentDisplayName}${studentDisplayClass}! Kamu Hebat Sekali! 🎉`;
+                document.getElementById('final-score-text').textContent = `Kamu berhasil mengumpulkan ${score} bintang dari ${quizData.length * 10} poin maksimal!`;
+                
+                playVictorySound();
+                // Trigger Confetti Celebration
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+                return;
+            }
+
+            const quiz = quizData[currentQuizIndex];
+            document.getElementById('quiz-category').textContent = `Soal #${currentQuizIndex + 1} - ${quiz.category}`;
+            document.getElementById('quiz-question').textContent = quiz.question;
+            document.getElementById('quiz-illustration').innerHTML = quiz.illustration;
+
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+
+            quiz.options.forEach((option, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "p-4 border-2 border-indigo-200 hover:border-indigo-500 bg-indigo-50/50 hover:bg-indigo-100 font-bold rounded-2xl text-indigo-900 transition flex items-center justify-between text-left shadow-sm hover:shadow";
+                btn.innerHTML = `<span>${option}</span> <i class="fa-solid fa-circle-chevron-right text-indigo-400"></i>`;
+                btn.onclick = () => checkAnswer(idx);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIdx) {
+            const quiz = quizData[currentQuizIndex];
+            if (selectedIdx === quiz.correct) {
+                score += 10;
+                document.getElementById('score-text').textContent = score;
+                playCorrectSound();
+                showAlert('🎉 Jawabanmu Benar! Hebat!', true);
+            } else {
+                playWrongSound();
+                showAlert('❌ Ups, kurang tepat. Yuk coba soal berikutnya!', false);
+            }
+
+            currentQuizIndex++;
+            setTimeout(() => {
+                loadQuizQuestion();
+            }, 1200);
+        }
+
+        function resetQuiz() {
+            playPopSound();
+            currentQuizIndex = 0;
+            score = 0;
+            document.getElementById('score-text').textContent = score;
+            document.getElementById('quiz-complete').classList.add('hidden');
+            document.getElementById('quiz-container').classList.remove('hidden');
+            loadQuizQuestion();
+        }
+
+        // Initialize state on page load
+        window.onload = function () {
+            updatePanjang();
+            updateBerat();
+        };
+    </script>
+</body>
+</html>
